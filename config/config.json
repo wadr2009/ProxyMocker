@@ -1,35 +1,47 @@
 {
-    "/mock/a/b/c": {
+    "/test1/api1": {
+        "isXmlApi": true,
+        "mockApiName": "通过提取请求参数判断返回不同响应",
+        "mockCheck": "1",
+        "mockRequest": {
+            "redirection": "http://localhost:5001/test1/api1"
+        },
+        "otherReturnBody": {
+            "$.data.code=0001": "响应1",
+            "$.data.code=0002": "响应2",
+            "$.data.code=0003": "响应3"
+        },
+        "returnBody": "默认响应"
+    },
+    "/test/api2": {
         "byDbReplace": {
-            "check": "xxxx",
-            "dbname": "xxxx",
+            "check": "check param1",
+            "dbname": "db1",
             "rule": {
-                "data.totalAmount": 2
+                "data.amountTax": -1
             },
-            "sql": "select xxx from xxxxx i where i.xxx = '{param}';",
+            "sql": "select a, b, c from table i where i.f = '{number}';",
             "sqlParam": {
-                "param": "data.number"
+                "number": "data.number"
             }
         },
         "byResReplace": {
-            "check": "aaa",
+            "check": "check param2",
             "rule": {
-                "data.amountTax": null,
-                "data.totalAmount": null
+                "data.state": 0
             }
         },
-        "mockApiName": "接口1",
-        "mockCheck": "invoice"
+        "mockApiName": "通过数据库修改返回、修改指定字段值",
+        "mockCheck": "check param3"
     },
-    "/api/xxx/xxx/check": {
-        "mockApiName": "查验",
-        "mockCheck": "invoice",
+    "/test/api2": {
+        "mockApiName": "发送给其他mock工具后， 根据数据库修改响应",
+        "mockCheck": "check param",
         "mockRequest": {
-            "redirection": "https://niubi.com/mock/a/b/c",
-            "toGet" : true
+            "redirection": "https://mockxxxx.com/test/api2",
+            "toGet": true
         },
         "returnBody": "",
         "timeout": 0
-    },
-
+    }
 }

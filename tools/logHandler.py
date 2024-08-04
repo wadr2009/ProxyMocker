@@ -25,14 +25,14 @@ class ColoredStreamHandler(logging.StreamHandler):
 class SingletonLogger:
     _instance = None
 
-    def __new__(cls, logfilename="server.log", dir=""):
+    def __new__(cls, log_file_name="service.log", dir=""):
         if cls._instance is None:
             cls._instance = super(SingletonLogger, cls).__new__(cls)
-            logfilename = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs', logfilename))
-            cls._instance.logger = cls._instance._create_logger(logfilename, dir)
+            log_file_name = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs', log_file_name))
+            cls._instance.logger = cls._instance._create_logger(log_file_name, dir)
         return cls._instance
 
-    def _create_logger(self, logfilename, dir):
+    def _create_logger(self, log_file_name, dir):
         # 创建日志记录器
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
@@ -42,7 +42,7 @@ class SingletonLogger:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
-        log_file = os.path.join(log_dir, f'{logfilename}')
+        log_file = os.path.join(log_dir, f'{log_file_name}')
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.INFO)
 
