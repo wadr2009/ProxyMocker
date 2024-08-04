@@ -1,0 +1,35 @@
+{
+    "/mock/a/b/c": {
+        "byDbReplace": {
+            "check": "xxxx",
+            "dbname": "xxxx",
+            "rule": {
+                "data.totalAmount": 2
+            },
+            "sql": "select xxx from xxxxx i where i.xxx = '{param}';",
+            "sqlParam": {
+                "param": "data.number"
+            }
+        },
+        "byResReplace": {
+            "check": "aaa",
+            "rule": {
+                "data.amountTax": null,
+                "data.totalAmount": null
+            }
+        },
+        "mockApiName": "接口1",
+        "mockCheck": "invoice"
+    },
+    "/api/xxx/xxx/check": {
+        "mockApiName": "查验",
+        "mockCheck": "invoice",
+        "mockRequest": {
+            "redirection": "https://niubi.com/mock/a/b/c",
+            "toGet" : true
+        },
+        "returnBody": "",
+        "timeout": 0
+    },
+
+}
