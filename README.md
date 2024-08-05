@@ -84,7 +84,6 @@
 - GET /mock/get_config
 保存配置
 - POST  /mock/save_config
-传入配置的json内容
 获取配置
 - GET /mock/get_config
 获取日志
