@@ -108,18 +108,11 @@ class MockServer(MockBase):
         :param originalInfo:
         :return: 返回mock后的body
         """
-        if self.mockConfig.mockCheck == None:
-            return False
 
         # 判断是否需要mock
-        originalRequestBody = originalInfo.request.body
-        originalRequestQuery = originalInfo.request.query
-        originalResponseBody = originalInfo.response.body
-
-        configCheck = self.mockConfig.mockCheck
-        if (configCheck not in originalRequestBody and configCheck not in originalRequestQuery
-                and configCheck not in originalResponseBody):
+        if not self.checkMock(originalInfo.request, originalInfo.response):
             return False
+
 
         # 判断是否需要超时
         configTimeout = self.mockConfig.timeout
@@ -128,6 +121,8 @@ class MockServer(MockBase):
             time.sleep(configTimeout)
 
         # 判断是否需要直接修改返回
+        originalRequestBody = self.getRequestBody(originalInfo.request)
+        originalResponseBody = originalInfo.response.body
         processor = JsonRuleProcessor(originalRequestBody, originalResponseBody, self.mockConfig.variablesInitSql)
         configBody = self.mockConfig.returnBody
 
@@ -151,37 +146,29 @@ class MockServer(MockBase):
         result = json.loads(originalInfo.response.body)
 
         try:
-            replaceSqlCheck = byDbReplace.check
             # 处理replaceSql的数据
-            if (replaceSqlCheck in originalRequestBody or replaceSqlCheck in originalRequestQuery
-                    or replaceSqlCheck in originalResponseBody):
-
-                # 组装sql
-                sql = sqlHandle(byDbReplace.sql, result, byDbReplace.sqlParam)
-                # TODO:后续换成DBControls
-                dbResult = queryMysql(byDbReplace.dbname, sql)
-                if dbResult != None and len(dbResult) > 0:
-                    # 只取第一条
-                    dbResult = dbResult[0]
-                    for key, value in byDbReplace.rule.items():
-                        key_parts = key.split('.')
-                        current_data = result
-                        for part in key_parts[:-1]:
-                            current_data = current_data.get(part, {})
-                        current_data[key_parts[-1]] = dbResult[value]
-
-            replaceCheck = byResReplace.check
-
-            # 处理replace的数据
-            if (replaceCheck in originalRequestBody or replaceCheck in originalRequestQuery
-                    or replaceCheck in originalResponseBody):
-                # 根据配置文件中的设置修改 JSON 数据
-                for key, value in byResReplace.rule.items():
+            # 组装sql
+            sql = sqlHandle(byDbReplace.sql, result, byDbReplace.sqlParam)
+            # TODO:后续换成DBControls
+            dbResult = queryMysql(byDbReplace.dbname, sql)
+            if dbResult != None and len(dbResult) > 0:
+                # 只取第一条
+                dbResult = dbResult[0]
+                for key, value in byDbReplace.rule.items():
                     key_parts = key.split('.')
                     current_data = result
                     for part in key_parts[:-1]:
                         current_data = current_data.get(part, {})
-                    current_data[key_parts[-1]] = value
+                    current_data[key_parts[-1]] = dbResult[value]
+
+
+            # 处理replace的数据
+            for key, value in byResReplace.rule.items():
+                key_parts = key.split('.')
+                current_data = result
+                for part in key_parts[:-1]:
+                    current_data = current_data.get(part, {})
+                current_data[key_parts[-1]] = value
 
             # 处理特殊规则
             result = processor.process_json(result)
@@ -200,8 +187,7 @@ class MockServer(MockBase):
     def redirectionMock(self, originalRequest: OriginalRequest):
         try:
             # 判断是否需要mock
-            if self.mockConfig.mockCheck == None or self.checkMock(self.mockConfig.mockCheck, originalRequest,
-                                                                   OriginalResponse()):
+            if not self.checkMock(originalRequest):
                 logging.info("无需处理")
                 return False
 
@@ -235,15 +221,22 @@ class MockServer(MockBase):
             logging.info(f"redirectionMock 处理异常, {e}", exc_info=True)
             return False
 
-    def checkMock(self, check: str, originalRequest: OriginalRequest, originalResponse: OriginalResponse):
+    def checkMock(self,
+                  originalRequest: OriginalRequest,
+                  originalResponse: OriginalResponse | None = None) -> bool:
+
+        check = self.mockConfig.mockCheck
+        if check is None or check == "":
+            return False
+
         originalRequestBody = originalRequest.body
         originalRequestQuery = originalRequest.query
 
         originalResponseBody = ''
-        if originalResponse.body is not None:
+        if originalResponse is not None and originalResponse.body is not None:
             originalResponseBody = originalResponse.body
 
-        return check not in originalRequestBody and check not in originalRequestQuery and check not in originalResponseBody
+        return check in originalRequestBody or check in originalRequestQuery or check in originalResponseBody
 
 
 if __name__ == '__main__':

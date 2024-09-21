@@ -26,6 +26,12 @@ class OriginalInfo:
         self.response: OriginalResponse = response
         self.request: OriginalRequest = request
 
+    def to_dict(self):
+        return {
+            'response': self.response.__dict__,
+            'request': self.request.__dict__
+        }
+
 class OriginalInfoEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, OriginalResponse) or isinstance(obj, OriginalRequest):

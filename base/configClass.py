@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, fields
 
 @dataclass
 class ByDbReplace:
-    check: str
+    # check: str
     dbname: str
     rule: dict
     sql: str
@@ -11,7 +11,7 @@ class ByDbReplace:
 
 @dataclass
 class ByResReplace:
-    check: str
+    # check: str
     rule: dict
 
 @dataclass

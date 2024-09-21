@@ -27,12 +27,12 @@ def mock():
         mockServer = MockServer(originalInfo.request.path)
         is_mock = mockServer.mockMock(originalInfo)
         if is_mock:
-            result = originalInfo.__dict__
-
+            result = originalInfo.to_dict()
 
     except Exception as e:
         logging.error(f"mock处理过程中出现异常, {e}", exc_info=True)
-    logging.info(f"return data: {result}")
+
+    logging.info(f"return data: {json.dumps(result, ensure_ascii=False)}")
     return jsonify(result)
 
 
