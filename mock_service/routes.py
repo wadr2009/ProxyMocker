@@ -14,20 +14,19 @@ logging = SingletonLogger().logger
 @mock_service_bp.route('/mock', methods=['POST'])
 def mock():
     # 获取请求内容
-    originalData = json.loads(request.data.decode('utf-8'))
-    result = originalData
+    original_data = json.loads(request.data.decode('utf-8'))
+    result = original_data
     # headers = request.headers
     try:
-        logging.info(f"Received request: {json.dumps(originalData, ensure_ascii=False)}")
-        data = copy.deepcopy(originalData)
-        originalResponse = OriginalResponse(**(data.get('response')))
-        originalrequest = OriginalRequest(**(data.get('request')))
-        originalInfo = OriginalInfo(originalResponse, originalrequest)
+        logging.info(f"Received request: {json.dumps(original_data, ensure_ascii=False)}")
 
-        mockServer = MockServer(originalInfo.request.path)
-        is_mock = mockServer.mockMock(originalInfo)
+        data = copy.deepcopy(original_data)
+        original_info = OriginalInfo(data)
+        mock_server = MockServer(original_info)
+        is_mock = mock_server.mock_mock()
+
         if is_mock:
-            result = originalInfo.to_dict()
+            result = original_info.to_dict()
 
     except Exception as e:
         logging.error(f"mock处理过程中出现异常, {e}", exc_info=True)

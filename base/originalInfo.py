@@ -22,9 +22,9 @@ class OriginalRequest:
     headers: dict = None
 
 class OriginalInfo:
-    def __init__(self, response:OriginalResponse, request:OriginalRequest):
-        self.response: OriginalResponse = response
-        self.request: OriginalRequest = request
+    def __init__(self, data: dict):
+        self.response: OriginalResponse = OriginalResponse(**(data.get('response')))
+        self.request: OriginalRequest = OriginalRequest(**(data.get('request')))
 
     def to_dict(self):
         return {

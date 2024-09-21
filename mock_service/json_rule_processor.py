@@ -28,14 +28,13 @@ class JsonRuleProcessor:
         else:
             self.response_cipher = response_body
 
-        mockFunctions = MockFunctions()
+        mock_functions = MockFunctions()
+        self.functions_mapping = self.__scan_class_methods(mock_functions)
         self.variables_mapping = {'request_cipher': self.request_cipher, 'response_cipher': self.response_cipher}
-        self.functions_mapping = self.__scan_class_methods(mockFunctions)
         self.variables_mapping.update(self.__init_variables(variablesInitSqlDict))
 
-
-    def process_json(self, json_data):
-        return parse_data(json_data, functions_mapping=self.functions_mapping,
+    def process_json(self, data: dict) -> dict:
+        return parse_data(data, functions_mapping=self.functions_mapping,
                           variables_mapping=self.variables_mapping, json_data=self.data)
 
     def __scan_class_methods(self, class_obj) -> dict:
@@ -62,9 +61,9 @@ class JsonRuleProcessor:
             sqlDict = parse_data(sqlDict, functions_mapping=self.functions_mapping,
                           variables_mapping=self.variables_mapping, json_data=self.data)
             for dbName, sqls in sqlDict.items():
-                dBControls = DBControls(dbName)
+                db_controls = DBControls(dbName)
                 for sql in sqls:
-                    result = dBControls.dBEngine.fetchone(sql)
+                    result = db_controls.dBEngine.fetchone(sql)
                     variables.update(result)
         except Exception as e:
             logging.error(f'__init_variables exception {e}', exc_info=True)
@@ -103,24 +102,6 @@ class MockFunctions:
 
         return base64_str
 
-    def settleResult(self, cipher, env='it'):
-
-        result = "{\"returnCode\":\"17000\",\"settleStatus\":\"fail\",\"destroySign\":\"@destroySign\",\"returnDesc\":\"settleResult默认请求失败\"}"
-        try:
-            cipher = base64.b64decode(cipher)
-            separator = bytes([29])
-            cipher = cipher.split(separator)[-1].decode('utf-8')
-            # 解密
-            rsp = requests.get(
-                f"https://rhine3{env}.i.wxblockchain.com/asset/test/bank/decodeStr?encdata={cipher}").json()
-            settleNumber = json.loads(rsp['data'])['body']['settleNumber']
-            rsp = requests.post(f"https://rhine3{env}.i.wxblockchain.com/asset/paygate/fund/QueryPayResult",
-                                   json={'settleNumber': settleNumber}).json()
-            result = json.dumps(rsp, ensure_ascii=False).replace('"', '\"')
-        except Exception as e:
-            logging.error(f"destroySign 处理异常, exception: {e}")
-
-        return result
 
     #x%y
     def remainder(self,x, y):
