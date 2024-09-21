@@ -69,7 +69,7 @@ class MockServer(MockBase):
 
         try:
             other_return_body = self.mockConfig.otherReturnBody
-            if other_return_body:
+            if not request_body or not other_return_body:
                 return
 
             json_data = json.loads(request_body)
@@ -149,14 +149,14 @@ class MockServer(MockBase):
     # TODO: 目前只支持转发, 不支持修改请求参数和请求类型
     def redirection_mock(self) -> bool:
         # 判断是否需要mock
-        if not self.check_mock():
-            logging.info("无需处理")
-            return False
+        # if not self.check_mock():
+        #     logging.info("无需处理")
+        #     return False
 
         # 判断是否需要转发
         mock_request = self.mockConfig.mockRequest
-        if not mock_request or not mock_request.redirection:
-            logging.info("redirectionUrl 为空")
+        if not self.check_mock() or not mock_request or not mock_request.redirection:
+            logging.info("无需处理")
             return False
 
         try:
