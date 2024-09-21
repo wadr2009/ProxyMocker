@@ -203,9 +203,8 @@ class MockServer(MockBase):
 
     def process_replace_sql(self, result):
         """
-        处理replaceSql的数据
+        根据replaceSql修改返回
         :param result: 需要处理的结果数据
-        :return: 处理后的结果数据
         """
         by_db_replace = self.mockConfig.byDbReplace
 
@@ -227,6 +226,10 @@ class MockServer(MockBase):
                 current_data[key_parts[-1]] = db_result[value]
 
     def process_by_res_replace(self, result):
+        """
+        根据byResReplace修改返回
+        :param result: 需要处理的结果数据
+        """
         by_res_replace = self.mockConfig.byResReplace
 
         if not by_res_replace:
